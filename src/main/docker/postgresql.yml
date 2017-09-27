@@ -1,0 +1,11 @@
+version: '2'
+services:
+    gitman-postgresql:
+        image: postgres:9.6.2
+        # volumes:
+        #     - ~/volumes/jhipster/Gitman/postgresql/:/var/lib/postgresql/data/
+        environment:
+            - POSTGRES_USER=Gitman
+            - POSTGRES_PASSWORD=
+        ports:
+            - 5432:5432
