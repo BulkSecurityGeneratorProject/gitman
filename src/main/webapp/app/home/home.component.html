@@ -33,7 +33,10 @@
 <div class="alert alert-success" *ngFor="let build of latestBuild">
     Latest build  status <strong>{{build.status}}</strong> stage <b>{{build.stage}}</b> on <b>{{build.ref}}</b>
 </div>
-<p class="lead" >Envirnonment Data</p>
+
+
+<p class="lead" >Envirnonment Data 
+<span class="sr-only">Loading...</span></p>
 <p><ngb-progressbar value="{{currentPage}}" showValue="true" ></ngb-progressbar></p>
 
 <hr/>
@@ -68,10 +71,15 @@
                  <div [ngSwitch]="deploymentGroups.get(entry)[0].checkMK == null">
                     <div class="alert alert-success" *ngSwitchCase="false">
                              CheckMK {{deploymentGroups.get(entry)[0].checkMK}}
-                              <a href="#" (click)="getCheckMKStatus(entry)">Refresh CheckMK status</a>
+                              <a class="btn" href="#" (click)="getCheckMKStatus(entry)"><fa name="retweet"></fa>Refresh</a>
+
                     </div>
                     <div class="alert alert-warning" *ngSwitchCase="true">
-                         <a href="#" (click)="getCheckMKStatus(entry)">Click for CheckMK status</a>
+                         
+                         <a href="#" class="btn" (click)="getCheckMKStatus(entry)">
+                           <fa name="search-plus"></fa>
+                              CheckMK Status
+                         </a>
                     </div>
                  </div>
 
