@@ -9,6 +9,7 @@ import { CheckMK } from '../services/CheckMK';
 import { Gitlab } from '../services/Gitlab';
 
 import { Subscription } from 'rxjs/Subscription';
+import { saveAs } from 'file-saver';
 
 @Component({
     selector: 'jhi-home',
@@ -27,7 +28,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
     public latestBuild = Object;
     public isCollapsed = false;
-    public deploymentGroups: Map<string, {gitData:object[],collapsed:boolean,ckeckMK_status:string}> = new Map<string, {gitData:object[],collapsed:boolean,ckeckMK_status:string}>();
+    public deploymentGroups: Map<string, { gitData: object[], collapsed: boolean, ckeckMK_status: string }> = new Map<string, { gitData: object[], collapsed: boolean, ckeckMK_status: string }>();
     public deployments: Map<string, Map<string, object[]>> = new Map<string, Map<string, object[]>>();
     private processedDeployments = 0;
     private subscription: Subscription;
@@ -83,20 +84,20 @@ export class HomeComponent implements OnInit, OnDestroy {
 
     getDeploymentData() {
         console.log('getDeploymentData');
-        this.subscription = this.gitlab.retrieveDeployments(100).subscribe(deployment => {
+        this.subscription = this.gitlab.retrieveDeployments(10).subscribe(deployment => {
             const data = deployment;
             this.processedDeployments++;
             //console.log('Retrieved item data='+data);
 
             data.forEach(item => {
-                
-                let envData={gitData:[],collapsed:false,ckeckMK_status:"undefined"};
-                
+
+                let envData = { gitData: [], collapsed: false, ckeckMK_status: "undefined" };
+
                 if (this.deploymentGroups.get(item.environment.name)) {
                     envData = this.deploymentGroups.get(item.environment.name);
                 }
                 envData['gitData'].push(item);
-                
+
                 this.deploymentGroups.set(item.environment.name, envData);
 
             });
@@ -119,7 +120,7 @@ export class HomeComponent implements OnInit, OnDestroy {
                 }
             }
 
-    });
+        });
     }
 
     getCheckMKStatus($environment: string) {
@@ -132,14 +133,15 @@ export class HomeComponent implements OnInit, OnDestroy {
 
     }
 
-    downloadProps()
-    {
+    downloadProps() {
         console.log('Download config props');
-          let response: Response;
-        this.gitlab.downloadFile("configuration/local/config.properties?ref=develop-2.2")
-        .map((res: Response) => response = res.json())
-        .subscribe((res:Response)=>{
-            console.log(res);
-        });
+        let response: Response;
+        this.gitlab.downloadFile("")
+            .map((res: Response) => response = res.json())
+            .subscribe((res: Response) => {
+                var blob = new Blob([atob(res['content'])], { type: 'application/zip' });
+                var url = window.URL.createObjectURL(blob);
+                saveAs(blob, 'config.properties');
+            });
     }
 }

@@ -89,7 +89,7 @@ export class Gitlab implements OnInit {
 	downloadFile($path):Observable<Response> {
 		const options = new RequestOptions({ headers: this.authHeaders()});
 
-		return this.http.get(this.URL + 'repository/files' + $path, options );
+		return this.http.get("https://gitlab.zaa.nttdata-labs.com/api/v3/projects/4/repository/files/configuration/local/config.properties?ref=develop-2.2", options );
 	}
 
 }
