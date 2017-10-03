@@ -10,68 +10,55 @@
                     translateValues="{username: '{{account.login}}'}"> You are logged in as user "{{account.login}}". </span>
             </div>
 
-            <!--<div class="alert alert-warning" *ngSwitchCase="false">
-                <span jhiTranslate="global.messages.info.authenticated.prefix">If you want to </span>
-                <a class="alert-link" (click)="login()" jhiTranslate="global.messages.info.authenticated.link">sign in</a><span jhiTranslate="global.messages.info.authenticated.suffix">, you can try the default accounts:<br/>- Administrator (login="admin" and password="admin") <br/>- User (login="user" and password="user").</span>
-            </div>
-
-            <div class="alert alert-warning" *ngSwitchCase="false">
-                <span jhiTranslate="global.messages.info.register.noaccount">You don't have an account yet?</span>
-                <a class="alert-link" routerLink="register" jhiTranslate="global.messages.info.register.link">Register a new account</a>
-            </div>
-
-            <ng-progress [positionUsing]="'translate3d'" [minimum]="0" [maximum]="1"
-             
-             [color]="'red'"  [thick]="true" [ease]="'linear'"></ng-progress>
-        -->
+           
            
            
         </div>
     </div>
 </div>
+  
+ <div [ngSwitch]=" latestBuild.hasOwnProperty('status') ">
+  <div class="alert alert-success" *ngSwitchCase="true" >
+    
+    Latest build  status <strong>{{latestBuild.status}}</strong> stage <b>{{latestBuild.stage}}</b> on <b>{{latestBuild.ref}}</b>
+  
 
-<div class="alert alert-success" *ngFor="let build of latestBuild">
-    Latest build  status <strong>{{build.status}}</strong> stage <b>{{build.stage}}</b> on <b>{{build.ref}}</b>
-</div>
+  </div>
+  <div class="alert alert-success" *ngSwitchCase="false">
+     <fa name="spinner" animation="spin"></fa>Retrieving latest build information
+    
+  </div>
+ </div>
 
 
-<p class="lead" >Envirnonment Data 
-<span class="sr-only">Loading...</span></p>
-<p><ngb-progressbar value="{{currentPage}}" showValue="true" ></ngb-progressbar></p>
 
+<p class="lead" >Envirnonment Data </p>
+<p>
+  <!-- <ngb-progressbar value="{{currentPage}}" showValue="true" ></ngb-progressbar> -->
+  Loaded last {{processedDeployments}} pages out of {{gitlab.lastPage}};
+</p>
+  
 <hr/>
-<!-- 
-<div class="row" >
-    <div class="col-sm-3" ><p class="text-center">User</p></div>
-    <div class="col-sm-3" ><p class="text-center">Commit Reference</p></div>
-    <div class="col-sm-3" ><p class="text-center">Commit Sha</p></div>
-    <div class="col-sm-3" ><p class="text-center">Environment Name</p></div>
-</div>
 
-<div class="row" *ngFor = "let entry of data;">
-    <div class="col-sm-3" ><p class="text-center">{{entry.user.name}}</p></div>
-    <div class="col-sm-3"><p class="text-center">{{entry.ref}}</p></div>
-    <div class="col-sm-3"><p class="text-center">{{entry.sha}}</p></div>
-    <div class="col-sm-3" ><p class="text-center">{{entry.environment.name}}</p></div>
-</div>
--->
-<div class="row" *ngFor = "let entry of deploymentGroups.keys();">
-    <div class="col-sm-1 text-right" ><b>{{entry}}</b></div>
-       <div class="col-sm-1 text-left" > <button type="button" class="btn btn-outline-primary" (click)="deploymentGroups.get(entry)[0].collapsed = !deploymentGroups.get(entry)[0].collapsed"
-          [attr.aria-expanded]="deploymentGroups.get(entry)[0].collapsed" aria-controls="collapseExample">
-            {{deploymentGroups.get(entry).length}}
+<div class="row" *ngFor = " let entry of getEnvironmentNames() ">
+    <div class="col-sm-1 text-right" ><b>{{entry}}  </b></div>
+       <div class="col-sm-1 text-left" > <button type="button" class="btn btn-outline-primary" (click)="deploymentGroups.get(entry).collapsed = !deploymentGroups.get(entry).collapsed"
+          [attr.aria-expanded]="deploymentGroups.get(entry).collapsed" aria-controls="collapseExample">
+            {{deploymentGroups.get(entry).gitData.length}}
         </button></div>
-        <div class="col-sm-2 text-center" >Deploy {{deploymentGroups.get(entry)[deploymentGroups.get(entry).length-1].deployable.status}}</div>
-        <div class="col-sm-2 text-center" >Last commit {{deploymentGroups.get(entry)[deploymentGroups.get(entry).length-1].sha.substring(0,5)}}</div>
+        <div class="col-sm-2 text-center" > <!--{{deploymentGroups.get(entry).gitData[deploymentGroups.get(entry).gitData.length-1].deployable.status}} -->
+          
+          {{deploymentGroups.get(entry).gitData[deploymentGroups.get(entry).gitData.length-1].deployable.status}}
+        </div>
+        <div class="col-sm-2 text-center" >Last commit {{deploymentGroups.get(entry).gitData[deploymentGroups.get(entry).gitData.length-1].sha.substring(0,5)}}</div>
         <div class="col-sm-3 text-center" >__Locked_Status__</div>
         <div class="col-sm-3 text-center" >__Locked_By__</div>
-        <div id="collapseExample" [ngbCollapse]="!deploymentGroups.get(entry)[0].collapsed">
-            <div class="card">              
+        <div id="collapseExample" class="col-sm-12" [ngbCollapse]="!deploymentGroups.get(entry).collapsed">
                
-                 <div [ngSwitch]="deploymentGroups.get(entry)[0].checkMK == null">
+                 <div [ngSwitch]="deploymentGroups.get(entry).checkMK == null">
                     <div class="alert alert-success" *ngSwitchCase="false">
-                             CheckMK {{deploymentGroups.get(entry)[0].checkMK}}
-                              <a class="btn" href="#" (click)="getCheckMKStatus(entry)"><fa name="retweet"></fa>Refresh</a>
+                             CheckMK {{deploymentGroups.get(entry).checkMK}}
+                              <a class="btn" href="#" (click)="getCheckMKStatus(entry)"><fa name="refresh"></fa>Refresh</a>
 
                     </div>
                     <div class="alert alert-warning" *ngSwitchCase="true">
@@ -105,7 +92,7 @@
                 </div>
 
 
-                <div class="col-md-12">
+                
                     <table class="table table-striped">
                      <thead>
                             <tr>
@@ -118,22 +105,21 @@
                             </tr>
                         </thead>
                         <tbody>
-                         <tr *ngFor="let item of deploymentGroups.get(entry)">
+                         <tr *ngFor="let item of deploymentGroups.get(entry).gitData">
                                 <td>{{item.user.name}}</td>
                                 <td>{{item.id}}</td>
                                 <td>{{item.sha}}</td>
                                 <td>{{item.deployable.status}}</td>
                                 <td>{{item.deployable.stage}}</td>
-                                <td>{{item.deployable.finished_at}}</td>
+                                <td>{{item.deployable.finished_at| date:'dd, MMM y HH:mm'}}</td>
                             </tr>
                         </tbody>
                     </table>
-                </div>
                 
-            </div>
-        </div>
 
-    </div>
+       </div>
+
+    </div> 
 </div>
 
 

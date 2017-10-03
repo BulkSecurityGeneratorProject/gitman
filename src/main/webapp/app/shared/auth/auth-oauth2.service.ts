@@ -12,6 +12,8 @@ export class AuthServerProvider {
         private http: Http,
         private base64: JhiBase64Service,
         private $localStorage: LocalStorageService
+        
+         
     ) {}
 
     getToken() {
@@ -21,14 +23,15 @@ export class AuthServerProvider {
     login(credentials): Observable<any> {
         const data = 'username=' +  encodeURIComponent(credentials.username) + '&password=' +
             encodeURIComponent(credentials.password) + '&grant_type=password&scope=read%20write&' +
-            'client_secret=my-secret-token-to-change-in-production&client_id=Gitmanapp';
+            'client_secret=zaa_secret&client_id=zaa';
         const headers = new Headers ({
             'Content-Type': 'application/x-www-form-urlencoded',
             'Accept': 'application/json',
-            'Authorization': 'Basic ' + this.base64.encode('Gitmanapp' + ':' + 'my-secret-token-to-change-in-production')
+            'Authorization': 'Basic ' + this.base64.encode('zaa' + ':' + 'zaa-secret'),
+            'Access-Control-Allow-Origin': '*'
         });
 
-        return this.http.post('oauth/token', data, {
+        return this.http.post('http://localhost:8888/coba.zaa.service.oauth/oauth/token', data, {
             headers
         }).map(authSuccess.bind(this));
 

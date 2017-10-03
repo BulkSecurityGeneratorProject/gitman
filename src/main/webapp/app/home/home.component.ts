@@ -24,12 +24,14 @@ export class HomeComponent implements OnInit, OnDestroy {
     account: Account;
     modalRef: NgbModalRef;
 
-    
+
     public latestBuild = Object;
     public isCollapsed = false;
-    public deploymentGroups: Map<string, Object[]> = new Map<string, Object[]>();
-    processed = 0;
-    subscription: Subscription;
+    public deploymentGroups: Map<string, {gitData:object[],collapsed:boolean,ckeckMK_status:string}> = new Map<string, {gitData:object[],collapsed:boolean,ckeckMK_status:string}>();
+    public deployments: Map<string, Map<string, object[]>> = new Map<string, Map<string, object[]>>();
+    private processedDeployments = 0;
+    private subscription: Subscription;
+
 
 
     constructor(private http: Http,
@@ -49,14 +51,13 @@ export class HomeComponent implements OnInit, OnDestroy {
         });
         this.registerAuthenticationSuccess();
 
-        this.gitlab.getLastestBuilld().subscribe(build => { this.latestBuild = build; });
-        //this.subscription=this.gitlab
+        this.gitlab.getLastestBuilld().subscribe(buildData => { this.latestBuild = buildData[0]; });
         this.getDeploymentData();
     }
 
     ngOnDestroy() {
-        // unsubscribe to ensure no memory leaks
         this.subscription.unsubscribe();
+
     }
 
 
@@ -68,7 +69,7 @@ export class HomeComponent implements OnInit, OnDestroy {
         });
 
 
-    } 
+    }
 
     isAuthenticated() {
         return this.principal.isAuthenticated();
@@ -78,25 +79,57 @@ export class HomeComponent implements OnInit, OnDestroy {
         this.modalRef = this.loginModalService.open();
     }
 
+
+
     getDeploymentData() {
-        this.subscription = this.gitlab.retrieveDeployments().subscribe(deployment => {
-            const data = deployment.json();
-            //console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Recieved '+deployment);
+        console.log('getDeploymentData');
+        this.subscription = this.gitlab.retrieveDeployments(600).subscribe(deployment => {
+            const data = deployment;
+            this.processedDeployments++;
+            //console.log('Retrieved item data='+data);
+
             data.forEach(item => {
-                let envData = [];
+                
+                let envData={gitData:[],collapsed:false,ckeckMK_status:"undefined"};
+                
                 if (this.deploymentGroups.get(item.environment.name)) {
                     envData = this.deploymentGroups.get(item.environment.name);
                 }
-                if (!item.hasOwnProperty('collapsed')) {
-                    item['collapsed'] = false;
-                }
-                envData.push(item);
+                envData['gitData'].push(item);
+                
                 this.deploymentGroups.set(item.environment.name, envData);
+
             });
-        });
+            for (let entry of Array.from(this.deploymentGroups.keys())) {
+                const key: string[] = entry.split('/');
+                if (key.length == 2) {
+                    let apps: Map<string, object[]> = this.deployments.get(key[0]) || new Map<string, object[]>();
+                    let commits: object[] = this.deploymentGroups.get(entry).gitData;
+                    if (apps.get(key[1]) == null) {
+                        apps.set(key[1], []);
+                    }
+
+                    //apps.get(key[1]).push(Array.from(commits));
+                    this.deployments.set(key[0], apps);
+
+                    // for (let entry of Array.from(this.deployments.keys())) {
+                    //     let a: Map<string, Object[]> = this.deployments.get(entry);
+                    //     console.log("Key " + entry + " keyset=" + a.keys());
+                    // }
+
+                }
+            }
+
+    });
     }
 
     getCheckMKStatus($environment: string) {
         this.checkMK.getCheckMKStatus($environment, this.deploymentGroups);
+    }
+
+
+    getEnvironmentNames(): string[] {
+        return Array.from(this.deploymentGroups.keys()).sort();
+
     }
 }
