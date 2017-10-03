@@ -37,22 +37,32 @@
   <!-- <ngb-progressbar value="{{currentPage}}" showValue="true" ></ngb-progressbar> -->
   Loaded last {{processedDeployments}} pages out of {{gitlab.lastPage}};
 </p>
-  
+  <div class="row" *ngIf = " getEnvironmentNames().length>0 ">
+    <div class="col-sm-2 text-center" >Environment Name</div>
+     <div class="col-sm-2 text-center" >Status</div>
+     <div class="col-sm-2 text-center" >Last Commit</div>
+     <div class="col-sm-3 text-center" >Locked Status</div>
+     <div class="col-sm-3 text-center" >Locked By</div>
+  </div>
 <hr/>
 
 <div class="row" *ngFor = " let entry of getEnvironmentNames() ">
     <div class="col-sm-1 text-right" ><b>{{entry}}  </b></div>
-       <div class="col-sm-1 text-left" > <button type="button" class="btn btn-outline-primary" (click)="deploymentGroups.get(entry).collapsed = !deploymentGroups.get(entry).collapsed"
+       <div class="col-sm-1 text-left" >
+        <button type="button" class="btn btn-outline-primary" 
+        (click)="deploymentGroups.get(entry).collapsed = !deploymentGroups.get(entry).collapsed"
           [attr.aria-expanded]="deploymentGroups.get(entry).collapsed" aria-controls="collapseExample">
             {{deploymentGroups.get(entry).gitData.length}}
-        </button></div>
-        <div class="col-sm-2 text-center" > <!--{{deploymentGroups.get(entry).gitData[deploymentGroups.get(entry).gitData.length-1].deployable.status}} -->
-          
-          {{deploymentGroups.get(entry).gitData[deploymentGroups.get(entry).gitData.length-1].deployable.status}}
-        </div>
-        <div class="col-sm-2 text-center" >Last commit {{deploymentGroups.get(entry).gitData[deploymentGroups.get(entry).gitData.length-1].sha.substring(0,5)}}</div>
-        <div class="col-sm-3 text-center" >__Locked_Status__</div>
-        <div class="col-sm-3 text-center" >__Locked_By__</div>
+        </button>
+      </div>
+        <div class="col-sm-2 text-center" >{{deploymentGroups.get(entry).gitData[deploymentGroups.get(entry).gitData.length-1].deployable.status}}</div>
+        <div class="col-sm-2 text-center" >
+         <a href="https://gitlab.zaa.nttdata-labs.com/zaa/ZAA/commit/{{deploymentGroups.get(entry).gitData[deploymentGroups.get(entry).gitData.length-1].sha}}" style="overflow: hidden;text-overflow: ellipsis;white-space: nowrap;" target="_blank">
+         {{deploymentGroups.get(entry).gitData[deploymentGroups.get(entry).gitData.length-1].sha.substring(0,5)}}
+       </a>
+       </div>
+        <div class="col-sm-3 text-center" >[false]</div>
+        <div class="col-sm-3 text-center" >[user]</div>
         <div id="collapseExample" class="col-sm-12" [ngbCollapse]="!deploymentGroups.get(entry).collapsed">
                
                  <div [ngSwitch]="deploymentGroups.get(entry).checkMK == null">
@@ -77,7 +87,7 @@
                   <div class="panel-body">
                        <button type="button" class="btn btn-outline-primary">Lock The Envorionment</button>
                        <button type="button" class="btn btn-outline-primary">Run/Schedule ZAT Test Suite</button>
-                       <button type="button" class="btn btn-outline-primary">Download Config Properties</button>
+                       <button type="button" class="btn btn-outline-primary" (click)="downloadProps()">Download Config Properties</button>
                        <button type="button" class="btn btn-outline-primary">View Logs</button>
                        <button type="button" class="btn btn-outline-primary">Redeploy</button>
                   </div>

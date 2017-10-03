@@ -17,7 +17,6 @@ export class CheckMK {
         const envName: string = $environment.split('/')[0];
         let hostName: string = envName.toUpperCase();
         if ('acc' == envName) {
-
             hostName += '-ENG1';
         }
         else {

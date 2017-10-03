@@ -24,3 +24,10 @@ only screen and (                min-resolution: 2dppx) {
     }
 }
 
+.elipsize
+{
+	white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+

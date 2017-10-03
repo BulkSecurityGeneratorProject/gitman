@@ -83,7 +83,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
     getDeploymentData() {
         console.log('getDeploymentData');
-        this.subscription = this.gitlab.retrieveDeployments(600).subscribe(deployment => {
+        this.subscription = this.gitlab.retrieveDeployments(100).subscribe(deployment => {
             const data = deployment;
             this.processedDeployments++;
             //console.log('Retrieved item data='+data);
@@ -109,7 +109,6 @@ export class HomeComponent implements OnInit, OnDestroy {
                         apps.set(key[1], []);
                     }
 
-                    //apps.get(key[1]).push(Array.from(commits));
                     this.deployments.set(key[0], apps);
 
                     // for (let entry of Array.from(this.deployments.keys())) {
@@ -131,5 +130,16 @@ export class HomeComponent implements OnInit, OnDestroy {
     getEnvironmentNames(): string[] {
         return Array.from(this.deploymentGroups.keys()).sort();
 
+    }
+
+    downloadProps()
+    {
+        console.log('Download config props');
+          let response: Response;
+        this.gitlab.downloadFile("configuration/local/config.properties?ref=develop-2.2")
+        .map((res: Response) => response = res.json())
+        .subscribe((res:Response)=>{
+            console.log(res);
+        });
     }
 }

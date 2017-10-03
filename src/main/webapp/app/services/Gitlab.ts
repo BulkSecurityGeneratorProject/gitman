@@ -20,17 +20,19 @@ export class Gitlab implements OnInit {
 
 	}
 
+	authHeaders(): Headers {
+		const authHeaders = new Headers();
+		authHeaders.append('PRIVATE-TOKEN', 'Zv9PMoMNXFhLzYGBv8iz');
+		authHeaders.append('Access-Control-Allow-Origin', '*');
+		return authHeaders;
+	}
+
 	requestOptions($page: number, $perPage: number): RequestOptions {
 		const queryParams = new URLSearchParams();
 		queryParams.append('per_page', $perPage.toString());
 		queryParams.append('page', '' + $page.toString());
 
-		const authHeaders = new Headers();
-		authHeaders.append('PRIVATE-TOKEN', 'Zv9PMoMNXFhLzYGBv8iz');
-		authHeaders.append('Access-Control-Allow-Origin', '*');
-		//authHeaders.append('Access-Control-Allow-Headers', 'Cache-Control, Pragma, Origin, Authorization, Content-Type, X-Requested-With');
-		//authHeaders.append('Access-Control-Allow-Methods', 'GET, PUT, POST');
-		const options = new RequestOptions({ headers: authHeaders, params: queryParams });
+		const options = new RequestOptions({ headers: this.authHeaders(), params: queryParams });
 
 		return options;
 	}
@@ -47,7 +49,6 @@ export class Gitlab implements OnInit {
 
 		this.http.get(this.URL + 'jobs', requestOptions).map((res: Response) => response = res).subscribe((res: Response) => {
 			this.build.next(res.json());
-			//console.log('LatestBuild' + JSON.stringify(this.build));
 		});
 
 		return this.build.asObservable();
@@ -55,8 +56,6 @@ export class Gitlab implements OnInit {
 	}
 
 	retrieveDeployments($maxPages: number): Observable<any> {
-
-
 		let response: Response;
 		this.http.get(this.URL + 'deployments', this.requestOptions(1, 100))
 			.map((res: Response) => response = res)
@@ -64,18 +63,16 @@ export class Gitlab implements OnInit {
 
 				this.lastPage = parseInt(res.headers.get('X-Total-Pages'));
 				let page: number = this.lastPage;
-				console.log('While is' + (this.lastPage - $maxPages));
-
-
+				
 				while (page >= this.lastPage - $maxPages) {
 
 					let response: Response;
 					this.http.get(this.URL + 'deployments', this.requestOptions(--page, 100))
 						.map((response2: Response) => response2.json())
 						.subscribe(response2 => {
-							response2.forEach(item=>{
-								item['collapsed']=false;
-								item['checkMK']='Unresolved Status';
+							response2.forEach(item => {
+								item['collapsed'] = false;
+								item['checkMK'] = 'Unresolved Status';
 							});
 							this.deployments.next(response2);
 						});
@@ -87,6 +84,12 @@ export class Gitlab implements OnInit {
 
 			});
 		return this.deployments.asObservable();
+	}
+
+	downloadFile($path):Observable<Response> {
+		const options = new RequestOptions({ headers: this.authHeaders()});
+
+		return this.http.get(this.URL + 'repository/files' + $path, options );
 	}
 
 }
