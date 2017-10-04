@@ -20,7 +20,7 @@
  <div [ngSwitch]=" latestBuild.hasOwnProperty('status') ">
   <div class="alert alert-success" *ngSwitchCase="true" >
     
-    Latest build  status <strong>{{latestBuild.status}}</strong> stage <b>{{latestBuild.stage}}</b> on <b>{{latestBuild.ref}}</b>
+    Latest build  status  <strong>{{latestBuild.status}}</strong> stage <b>{{latestBuild.stage}}</b> on <b>{{latestBuild.ref}}</b>
   
 
   </div>
@@ -35,9 +35,115 @@
 <p class="lead" >Envirnonment Data </p>
 <p>
   <!-- <ngb-progressbar value="{{currentPage}}" showValue="true" ></ngb-progressbar> -->
-  Loaded last {{processedDeployments}} pages out of {{gitlab.lastPage}};
+  <!-- Loaded last {{processedDeployments}} pages out of {{gitlab.lastPage}}; -->
 </p>
-  <div class="row" *ngIf = " getEnvironmentNames().length>0 ">
+ 
+
+<div class="row">
+  <div class="col-sm-1 text-left" > Envrironment Name</div>
+  <div class="col-sm-4 text-center" >CheckMK Status</div>
+  <div class="col-sm-1 text-left" >Locked By</div>
+   <div class="col-sm-1 text-left" >
+          Locked at
+        </div>
+</div>
+<hr/>
+<div class="row" *ngFor = " let entry of getEnvironments() ">
+  <div class="col-sm-1 text-left" >
+       
+          <a class="btn" href="#" (click)="deployments.get(entry).showEnvs = !deployments.get(entry).showEnvs"
+          [attr.aria-expanded]="deployments.get(entry).showEnvs" aria-controls="collapseEnvs">
+          <div [ngSwitch]="deployments.get(entry).showEnvs">
+            <div *ngSwitchCase="false"><fa name="folder" size="2x"></fa></div>
+            <div *ngSwitchCase="true"><fa name="folder-open" size="2x"></fa></div>
+          </div>
+        {{entry}}</a></div>
+
+        <div [ngSwitch]="deployments.get(entry).checkMK == null" class="col-sm-4 text-center" >
+                    <div  *ngSwitchCase="false">
+                             
+                              <a class="btn" href="#" (click)="getCheckMKStatus(entry)"><fa name="refresh"></fa>{{deployments.get(entry).checkMK}}</a>
+                    </div>
+                    <div  *ngSwitchCase="true">
+                          <a href="#" class="btn" (click)="getCheckMKStatus(entry)">
+                           <fa name="search-plus"></fa>
+                              Status</a>
+                    </div>
+                 </div>
+
+        <div class="col-sm-1 text-left" >
+          [user]
+        </div>
+        <div class="col-sm-1 text-left" >
+          [date]
+        </div>
+  <div id="collapseEnvs" class="col-sm-12" [ngbCollapse]="!deployments.get(entry).showEnvs">
+     <div class="panel-group">
+                <div class="panel panel-primary">
+                  <div class="panel-heading">Enrironment Actions</div>
+                  <div class="panel-body">
+                       <button type="button" class="btn btn-outline-primary">Lock The Envorionment</button>
+                       <button type="button" class="btn btn-outline-primary">Run/Schedule ZAT Test Suite</button>
+                       <button type="button" class="btn btn-outline-primary" (click)="downloadProps()">Download Config Properties</button>
+                       <button type="button" class="btn btn-outline-primary">View Logs</button>
+                       <button type="button" class="btn btn-outline-primary">Redeploy</button>
+                  </div>
+                </div>
+                 <div class="panel panel-default">
+                    <div class="panel-heading">Database Actions</div>
+                     <div class="panel-body">
+                        <button type="button" class="btn btn-outline-primary">Cleanup Database</button>
+                        <button type="button" class="btn btn-outline-primary">Run initStaticData on this environment</button>
+                        <button type="button" class="btn btn-outline-primary">Setup a local tunnel via ssh</button></div>
+                    </div>
+                </div>
+    <div *ngFor=" let app of deployments.get(entry).apps.gitData.keys()">
+        <div  class="col-sm-12">
+      <a class="btn" href="#" (click)="deployments.get(entry).apps.gitData.get(app).collapsed = !deployments.get(entry).apps.gitData.get(app).collapsed"
+          [attr.aria-expanded]="deployments.get(entry).apps.gitData.get(app).collapsed" attr.aria-controls="collapse-{{app}}">
+          <div [ngSwitch]="deployments.get(entry).apps.gitData.get(app).collapsed">
+            <div *ngSwitchCase="false"><fa name="folder" size="2x"></fa></div>
+            <div *ngSwitchCase="true"><fa name="folder-open" size="2x"></fa></div>
+            <div *ngSwitchCase="null"><fa name="folder" size="2x"></fa></div>
+          </div>
+        {{app}}</a></div>
+        
+     
+
+<div id="collapse-{{app}}" class="col-sm-12" [ngbCollapse]="!deployments.get(entry).apps.gitData.get(app).collapsed">
+      Displaying last 10 deploy actions:
+      <table class="table table-striped">
+                     <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Ref</th>
+                                <th>Sha</th>
+                                <th>Status</th>
+                                <th>Stage</th>
+                                <th>Finished At</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                         <tr *ngFor=" let item of deployments.get(entry).apps.gitData.get(app)|slice:0:10">
+                                <td>{{item.user.name}}</td>
+                                <td>{{item.id}}</td>
+                                <td>{{item.sha}}</td>
+                                <td>{{item.deployable.status}}</td>
+                                <td>{{item.deployable.stage}}</td>
+                                <td>{{item.deployable.finished_at| date:'dd, MMM y HH:mm'}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+              
+
+</div>
+    </div>
+    
+    </div>
+
+</div>
+
+ <div class="row" *ngIf = " getEnvironmentNames().length>0 ">
     <div class="col-sm-2 text-center" >Environment Name</div>
      <div class="col-sm-2 text-center" >Status</div>
      <div class="col-sm-2 text-center" >Last Commit</div>
@@ -46,7 +152,7 @@
   </div>
 <hr/>
 
-<div class="row" *ngFor = " let entry of getEnvironmentNames() ">
+<!--<div class="row" *ngFor = " let entry of getEnvironmentNames() ">
     <div class="col-sm-1 text-right" ><b>{{entry}}  </b></div>
        <div class="col-sm-1 text-left" >
         <button type="button" class="btn btn-outline-primary" 
@@ -55,7 +161,11 @@
             {{deploymentGroups.get(entry).gitData.length}}
         </button>
       </div>
-        <div class="col-sm-2 text-center" >{{deploymentGroups.get(entry).gitData[deploymentGroups.get(entry).gitData.length-1].deployable.status}}</div>
+        <div class="col-sm-2 text-center" >
+        <div [ngSwitch]="deploymentGroups.get(entry).gitData[deploymentGroups.get(entry).gitData.length-1].deployable.status">
+          <div *ngSwitchCase=" 'success' "><fa name='check'></fa></div>
+        </div>
+      </div>
         <div class="col-sm-2 text-center" >
          <a href="https://gitlab.zaa.nttdata-labs.com/zaa/ZAA/commit/{{deploymentGroups.get(entry).gitData[deploymentGroups.get(entry).gitData.length-1].sha}}" style="overflow: hidden;text-overflow: ellipsis;white-space: nowrap;" target="_blank">
          {{deploymentGroups.get(entry).gitData[deploymentGroups.get(entry).gitData.length-1].sha.substring(0,5)}}
@@ -131,6 +241,7 @@
 
     </div> 
 </div>
+-->
 
 
 

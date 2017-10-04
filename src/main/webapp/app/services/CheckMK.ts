@@ -22,25 +22,22 @@ export class CheckMK {
         else {
             hostName += '-ENG';
         }
-        queryParams.append('host',  hostName);
+        queryParams.append('host', hostName);
         const options = new RequestOptions({ params: queryParams });
 
         this.http.get(this.URL, options)
             .map((res: Response) => response = res)
             .subscribe((res: Response) => {
                 const data = res.json();
-                const item=$deploymentGroups.get($environment);
-                item['checkMK']='Undefined';
+                const item = $deploymentGroups.get($environment);
+                item['checkMK'] = 'Undefined';
                 if (data.length > 1) {
                     item['checkMK'] = data[1][4];
-
                 }
                 error => {
                     $deploymentGroups.get($environment)['checkMK'] = 'Error';
                 }
             }
-
-
             );
     }
 }

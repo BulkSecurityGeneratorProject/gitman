@@ -63,7 +63,7 @@ export class Gitlab implements OnInit {
 
 				this.lastPage = parseInt(res.headers.get('X-Total-Pages'));
 				let page: number = this.lastPage;
-				
+
 				while (page >= this.lastPage - $maxPages) {
 
 					let response: Response;
@@ -71,9 +71,15 @@ export class Gitlab implements OnInit {
 						.map((response2: Response) => response2.json())
 						.subscribe(response2 => {
 							response2.forEach(item => {
-								item['collapsed'] = false;
+								 item['collapsed'] = false;
+								 item['showEnvs'] = false;
 								item['checkMK'] = 'Unresolved Status';
 							});
+							// console.log(response2);
+							// const environment: string = response2.environment.name.split('/');
+							// const data: Map<string, Object[]> = new Map<string, Object[]>();
+							// data.set(environment[1], response2.deployable.commit);
+							// let apps = { gitData: data, collapsed: false };
 							this.deployments.next(response2);
 						});
 
@@ -86,10 +92,10 @@ export class Gitlab implements OnInit {
 		return this.deployments.asObservable();
 	}
 
-	downloadFile($path):Observable<Response> {
-		const options = new RequestOptions({ headers: this.authHeaders()});
+	downloadFile($path): Observable<Response> {
+		const options = new RequestOptions({ headers: this.authHeaders() });
 
-		return this.http.get("https://gitlab.zaa.nttdata-labs.com/api/v3/projects/4/repository/files/configuration/local/config.properties?ref=develop-2.2", options );
+		return this.http.get("https://gitlab.zaa.nttdata-labs.com/api/v3/projects/4/repository/files/configuration/local/config.properties?ref=develop-2.2", options);
 	}
 
 }
