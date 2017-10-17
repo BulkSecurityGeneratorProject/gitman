@@ -1,43 +1,46 @@
-import { Injectable } from '@angular/core';
-import { Http, Headers, RequestOptions, Response, URLSearchParams } from '@angular/http';
+import {Injectable} from '@angular/core';
+import {Http, Headers, RequestOptions, Response, URLSearchParams} from '@angular/http';
 
 @Injectable()
-
 export class CheckMK {
 
-	private readonly URL = 'https://monitoring.zaa.nttdata-labs.com/monitoring/check_mk/view.py?view_name=service&service=Process%20Connect%20Direct&_secret=VKTRVCVEYDCBTFNQI@GT&output_format=json';
+    private readonly URL = 'https://monitoring.zaa.nttdata-labs.com/monitoring/check_mk/view.py';
 
-	constructor(private http: Http) { }
+    constructor(private http: Http) {
+    }
 
-	getCheckMKStatus($environment: string, $deploymentGroups: Map<string, any>) {
+    getCheckMKStatus($environment: string, $deploymentGroups: Map<string, any>) {
         const queryParams = new URLSearchParams();
         queryParams.append('_username', 'auto');
         let response: Response;
-
         const envName: string = $environment.split('/')[0];
         let hostName: string = envName.toUpperCase();
-        if ('acc' == envName) {
+        if ('acc' === envName) {
             hostName += '-ENG1';
-        }
-        else {
+        } else {
             hostName += '-ENG';
         }
+        // view_name=service&service=Process%20Connect%20Direct&_secret=VKTRVCVEYDCBTFNQI@GT&output_format=json
+        queryParams.append('view_name', 'service');
+        queryParams.append('service', 'Process%20Connect%20Direct');
+        queryParams.append('_secret', 'VKTRVCVEYDCBTFNQI@GT');
+        queryParams.append('output_format', 'json');
         queryParams.append('host', hostName);
-        const options = new RequestOptions({ params: queryParams });
+        const options = new RequestOptions({params: queryParams});
 
-        this.http.get(this.URL, options)
+        this.http.get(this.URL + '', options)
             .map((res: Response) => response = res)
             .subscribe((res: Response) => {
-                const data = res.json();
-                const item = $deploymentGroups.get($environment);
-                item['checkMK'] = 'Undefined';
-                if (data.length > 1) {
-                    item['checkMK'] = data[1][4];
+                    const data = res.json();
+                    const item = $deploymentGroups.get($environment);
+                    item['checkMK'] = 'Undefined';
+                    if (data.length > 1) {
+                        item['checkMK'] = data[1][4];
+                    }
+                /* (error) => {
+                        $deploymentGroups.get($environment)['checkMK'] = 'Error';
+                    } */
                 }
-                error => {
-                    $deploymentGroups.get($environment)['checkMK'] = 'Error';
-                }
-            }
             );
     }
 }

@@ -12,8 +12,6 @@ export class AuthServerProvider {
         private http: Http,
         private base64: JhiBase64Service,
         private $localStorage: LocalStorageService
-        
-         
     ) {}
 
     getToken() {

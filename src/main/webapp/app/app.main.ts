@@ -8,8 +8,8 @@ ProdConfig();
 if (module['hot']) {
     module['hot'].accept();
 }
-
-//enableProdMode();
+// Uncomment bellow for production mode.
+// enableProdMode();
 platformBrowserDynamic().bootstrapModule(GitmanAppModule)
 .then((success) => console.log(`Application started`))
 .catch((err) => console.error(err));
