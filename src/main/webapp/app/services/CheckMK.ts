@@ -22,7 +22,7 @@ export class CheckMK {
         }
         // view_name=service&service=Process%20Connect%20Direct&_secret=VKTRVCVEYDCBTFNQI@GT&output_format=json
         queryParams.append('view_name', 'service');
-        queryParams.append('service', 'Process%20Connect%20Direct');
+        queryParams.append('service', 'Process Connect Direct');
         queryParams.append('_secret', 'VKTRVCVEYDCBTFNQI@GT');
         queryParams.append('output_format', 'json');
         queryParams.append('host', hostName);
